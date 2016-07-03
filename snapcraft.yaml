@@ -1,0 +1,65 @@
+name: upnp-server
+version: 0.1.0
+summary: upload files with WebDAV and serve them via DLNA/UPnP
+description: very minimal UPnP/DLNA server that allows uploads via WebDAV
+confinement: strict
+
+apps:
+  minidlna:
+    command: run-minidlna
+    daemon: simple
+    plugs: [network, network-bind]
+  webdav:
+    command: run-lighthttpd
+    daemon: simple
+    plugs: [network, network-bind]
+
+parts:
+  minidlna:
+    source: ./minidlna
+    plugin: make
+    build-packages:
+        - libflac-dev
+        - libvorbis-dev
+        - libogg-dev
+        - libid3tag0-dev
+        - libexif-dev
+        - libsqlite3-dev
+        - libjpeg-dev
+        - libavformat-dev
+        - libavcodec-dev
+        - libavutil-dev
+        - autotools-dev
+        - autoconf
+        - autopoint
+        - gettext
+  copy:
+    plugin: copy
+    files:
+      run-minidlna: run-minidlna
+      run-lighthttpd: run-lighthttpd
+      config.sh: config.sh
+      default.yaml: default.yaml
+    stage-packages:
+        - libexif12
+        - libjpeg8
+        - libid3tag0
+        - libflac8
+        - libvorbisfile3
+        - libavformat-ffmpeg56
+        - libuuid1
+        - lighttpd-mod-webdav
+        - libstdc++6
+        - gawk
+        - libc-bin
+        - locales
+    after: [minidlna]
+    stage: [-usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6]
+  sqlite:
+    source: ./sqlite
+    plugin: make
+    build-packages:
+        - wget
+        - tar
+        - gzip
+    after: [copy]

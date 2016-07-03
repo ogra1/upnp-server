@@ -1,0 +1,12 @@
+diff -ruN sqlite-autoconf-3130000.orig/sqlite3.c sqlite-autoconf-3130000/sqlite3.c
+--- sqlite-autoconf-3130000.orig/sqlite3.c	2016-07-03 20:18:35.655842118 +0200
++++ sqlite-autoconf-3130000/sqlite3.c	2016-07-03 20:19:34.709428999 +0200
+@@ -29607,7 +29607,7 @@
+ */
+ static int robustFchown(int fd, uid_t uid, gid_t gid){
+ #if defined(HAVE_FCHOWN)
+-  return osGeteuid() ? 0 : osFchown(fd,uid,gid);
++  return osGeteuid() || osGeteuid() == uid ? 0 : osFchown(fd,uid,gid);
+ #else
+   return 0;
+ #endif

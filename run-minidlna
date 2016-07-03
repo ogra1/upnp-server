@@ -1,0 +1,36 @@
+#! /bin/sh
+
+set -e
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
+CONF=$SNAP_DATA/minidlna.conf
+BIN=$SNAP/minidlnad
+export HOME=$SNAP_DATA
+export MYIP="$($SNAP/getip|head -1)"
+echo $MYIP >$SNAP_DATA/.ip
+
+[ -e $CONF ] || $SNAP/config.sh >/dev/null 2>&1
+[ -e $SNAP_DATA/Media ] || mkdir -p $SNAP_DATA/Media
+[ -e $SNAP_DATA/log ] || mkdir -p $SNAP_DATA/log
+[ -e $SNAP_DATA/cache ] || mkdir -p $SNAP_DATA/cache
+
+if [ "$SNAP_VERSION" != "$(cat $SNAP_DATA/.config-version 2>/dev/null)" ]; then
+    # we have been upgraded!
+    $SNAP/config.sh >/dev/null 2>&1
+    echo $SNAP_VERSION >$SNAP_DATA/.config-version
+fi
+chmod 755 $SNAP_DATA/Media
+
+sed "s:media_dir=.*$:media_dir=$SNAP_DATA/Media:" $CONF >$CONF.tmp
+sed "s:log_dir=.*$:log_dir=$SNAP_DATA/log:" $CONF.tmp >$CONF
+sed "s:db_dir=.*$:db_dir=$SNAP_DATA/cache:" $CONF >$CONF.tmp
+sed "s:minissdpdsocket=.*$:minissdpdsocket=$SNAP_DATA/minissdpd.sock:" $CONF.tmp >$CONF
+rm $CONF.tmp
+
+cd $SNAP_DATA
+
+$BIN -S -L -P $SNAP_DATA/minidlna.pid -f $CONF \
+    | while IFS= read -r line; do echo "$(date -u "+%Y-%m-%d %H:%M:%S")-UTC $line"; done \
+    >>$SNAP_DATA/log/daemon.log 2>&1

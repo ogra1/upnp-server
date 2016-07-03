@@ -1,0 +1,130 @@
+diff --git a/clients.c b/clients.c
+index a8609d2..901622e 100644
+--- a/clients.c
++++ b/clients.c
+@@ -253,18 +253,20 @@ SearchClientCache(struct in_addr addr, int quiet)
+ 			if ((time(NULL) - clients[i].age) > 3600)
+ 			{
+ 				unsigned char mac[6];
+-				if (get_remote_mac(addr, mac) == 0 &&
+-				    memcmp(mac, clients[i].mac, 6) == 0)
+-				{
+-					/* Same MAC as last time when we were able to identify the client,
+-					 * so extend the timeout by another hour. */
+-					clients[i].age = time(NULL);
+-				}
+-				else
+-				{
+-					memset(&clients[i], 0, sizeof(struct client_cache_s));
+-					return NULL;
+-				}
++				//if (get_remote_mac(addr, mac) == 0 &&
++				//    memcmp(mac, clients[i].mac, 6) == 0)
++				//{
++				//	/* Same MAC as last time when we were able to identify the client,
++				//	 * so extend the timeout by another hour. */
++				//	clients[i].age = time(NULL);
++				//}
++				//else
++				//{
++				//	memset(&clients[i], 0, sizeof(struct client_cache_s));
++				//	return NULL;
++				//}
++				memset(&clients[i], 0, sizeof(struct client_cache_s));
++				return NULL;
+ 			}
+ 			if (!quiet)
+ 				DPRINTF(E_DEBUG, L_HTTP, "Client found in cache. [%s/entry %d]\n",
+@@ -285,7 +287,7 @@ AddClientCache(struct in_addr addr, int type)
+ 	{
+ 		if (clients[i].addr.s_addr)
+ 			continue;
+-		get_remote_mac(addr, clients[i].mac);
++		//get_remote_mac(addr, clients[i].mac);
+ 		clients[i].addr = addr;
+ 		clients[i].type = &client_types[type];
+ 		clients[i].age = time(NULL);
+diff --git a/inotify.c b/inotify.c
+index 745436c..44a181f 100644
+--- a/inotify.c
++++ b/inotify.c
+@@ -166,7 +166,8 @@ inotify_create_watches(int fd)
+ 	}
+ 	sqlite3_free_table(result);
+ 		
+-	max_watches = fopen("/proc/sys/fs/inotify/max_user_watches", "r");
++	//max_watches = fopen("/proc/sys/fs/inotify/max_user_watches", "r");
++	max_watches=0;
+ 	if( max_watches )
+ 	{
+ 		if( fscanf(max_watches, "%10u", &watch_limit) < 1 )
+@@ -664,8 +665,8 @@ start_inotify()
+ 		sleep(1);
+ 	}
+ 	inotify_create_watches(pollfds[0].fd);
+-	if (setpriority(PRIO_PROCESS, 0, 19) == -1)
+-		DPRINTF(E_WARN, L_INOTIFY,  "Failed to reduce inotify thread priority\n");
++	//if (setpriority(PRIO_PROCESS, 0, 19) == -1)
++	//	DPRINTF(E_WARN, L_INOTIFY,  "Failed to reduce inotify thread priority\n");
+ 	sqlite3_release_memory(1<<31);
+ 	av_register_all();
+         
+diff --git a/minidlna.c b/minidlna.c
+index c9303b1..12074fa 100644
+--- a/minidlna.c
++++ b/minidlna.c
+@@ -915,8 +915,8 @@ init(int argc, char **argv)
+ 	if (debug_flag)
+ 	{
+ 		pid = getpid();
+-		strcpy(log_str+65, "maxdebug");
+-		log_level = log_str;
++		//strcpy(log_str+65, "maxdebug");
++		//log_level = log_str;
+ 	}
+ 	else if (GETFLAG(SYSTEMD_MASK))
+ 	{
+diff --git a/scanner.c b/scanner.c
+index ee3af48..c297405 100644
+--- a/scanner.c
++++ b/scanner.c
+@@ -840,8 +840,8 @@ start_scanner()
+ 	struct media_dir_s *media_path;
+ 	char path[MAXPATHLEN];
+ 
+-	if (setpriority(PRIO_PROCESS, 0, 15) == -1)
+-		DPRINTF(E_WARN, L_INOTIFY,  "Failed to reduce scanner thread priority\n");
++	//if (setpriority(PRIO_PROCESS, 0, 15) == -1)
++	//	DPRINTF(E_WARN, L_INOTIFY,  "Failed to reduce scanner thread priority\n");
+ 	_notify_start();
+ 
+ 	setlocale(LC_COLLATE, "");
+diff --git a/upnphttp.c b/upnphttp.c
+index 418cde4..fdb641d 100644
+--- a/upnphttp.c
++++ b/upnphttp.c
+@@ -622,17 +622,20 @@ SendResp_presentation(struct upnphttp * h)
+ 	strcatf(&str,
+ 		"<h3>Connected clients</h3>"
+ 		"<table border=1 cellpadding=10>"
+-		"<tr><td>ID</td><td>Type</td><td>IP Address</td><td>HW Address</td><td>Connections</td></tr>");
++		"<tr><td>ID</td><td>Type</td><td>IP Address</td><td>Connections</td></tr>");
+ 	for (i = 0; i < CLIENT_CACHE_SLOTS; i++)
+ 	{
+ 		if (!clients[i].addr.s_addr)
+ 			continue;
+-		strcatf(&str, "<tr><td>%d</td><td>%s</td><td>%s</td><td>%02X:%02X:%02X:%02X:%02X:%02X</td><td>%d</td></tr>",
++		strcatf(&str, "<tr><td>%d</td><td>%s</td><td>%s</td><td>%d</td></tr>",
+ 				i, clients[i].type->name, inet_ntoa(clients[i].addr),
+-				clients[i].mac[0], clients[i].mac[1], clients[i].mac[2],
+-				clients[i].mac[3], clients[i].mac[4], clients[i].mac[5], clients[i].connections);
++				clients[i].connections);
+ 	}
+ 	strcatf(&str, "</table>");
++	if (number_of_children < 0)
++	{
++		number_of_children=0;
++	}
+ 
+ 	strcatf(&str, "<br>%d connection%s currently open<br>", number_of_children, (number_of_children == 1 ? "" : "s"));
+ 	strcatf(&str, "</BODY></HTML>\r\n");

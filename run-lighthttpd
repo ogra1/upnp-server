@@ -1,0 +1,53 @@
+#! /bin/sh
+
+CONF=$SNAP_DATA/lighttpd.conf
+BIN=$SNAP/usr/sbin/lighttpd
+PORT=80
+
+LC_ALL=C.UTF-8
+LANG=C.UTF-8
+
+if [ -e $SNAP_DATA/config.yaml ]; then
+    PORT=$(grep -A1 webdav $SNAP_DATA/config.yaml|\
+        grep port:|sed "s:.*port\: ::")
+fi
+
+cat << EOF >$CONF
+server.modules = (
+        "mod_access",
+        "mod_alias",
+        "mod_compress",
+        "mod_redirect",
+        "mod_webdav",
+#       "mod_rewrite",
+)
+
+server.document-root        = "$SNAP_DATA/Media"
+server.upload-dirs          = ( "$SNAP_DATA/lighttpd/uploads" )
+server.errorlog             = "$SNAP_DATA/lighttpd/error.log"
+server.pid-file             = "$SNAP_DATA/lighttpd.pid"
+server.port                 = $PORT
+webdav.activate             = "enable"
+webdav.is-readonly          = "disable"
+webdav.sqlite-db-name       = "$SNAP_DATA/lighttpd/lighttpd.webdav_lock.db"
+
+index-file.names            = ( "index.php", ".index.html", "index.lighttpd.html" )
+url.access-deny             = ( "~", ".inc" )
+static-file.exclude-extensions = ( ".php", ".pl", ".fcgi" )
+
+compress.cache-dir          = "$SNAP_DATA/lighttpd/compress/"
+compress.filetype           = ( "application/javascript", "text/css", "text/html", "text/plain" )
+
+# default listening port for IPv6 falls back to the IPv4 port
+## Use ipv6 if available
+#include_shell "/usr/share/lighttpd/use-ipv6.pl " + server.port
+#include_shell "$SNAP/usr/share/lighttpd/create-mime.assign.pl"
+#include_shell "$SNAP/usr/share/lighttpd/include-conf-enabled.pl"
+EOF
+chmod 0600 $CONF
+
+[ -e $SNAP_DATA/lighttpd/compress ] || mkdir -p $SNAP_DATA/lighttpd/compress
+[ -e $SNAP_DATA/lighttpd/uploads ] || mkdir -p $SNAP_DATA/lighttpd/uploads
+touch $SNAP_DATA/Media/.index.html
+
+$BIN -D -f $CONF -m $SNAP/usr/lib/lighttpd

@@ -1,0 +1,9 @@
+config:
+  dlna:
+    port: 8200
+    name: Snappy DLNA Server
+    showip: true
+    interval: 900
+  webdav:
+    port: 80
+
