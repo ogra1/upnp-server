@@ -23,7 +23,7 @@ parts:
         - automake
         - autopoint
         - autotools-dev
-        - gcc-5
+        - gcc
         - gettext
         - git
         - libavcodec-dev
