@@ -1,8 +1,15 @@
 name: upnp-server
-version: 0.1.0
+version: 0.1.1
 summary: upload files with WebDAV and serve them via DLNA/UPnP
-description: very minimal UPnP/DLNA server that allows uploads via WebDAV
+description: |
+    A very minimal UPnP/DLNA server that allows uploads via WebDAV
+
+    The snap ships a minidlna binary and a webserver in DAV mode sharing
+    a directory. To make files available via UPnP open dav://localhost/
+    (or the IP instead of localhost if you want to manage the files
+    remotely) in a file manager and drop media into the dir.
 confinement: strict
+base: core18
 
 apps:
   minidlna:
@@ -37,15 +44,16 @@ parts:
         - libsqlite3-dev
         - libvorbis-dev
   copy:
-    plugin: copy
-    files:
-      run-minidlna: run-minidlna
-      run-lighthttpd: run-lighthttpd
-      config.sh: config.sh
-      default.yaml: default.yaml
+    plugin: nil
+    source: .
+    override-build: |
+      cp -av run-minidlna $SNAPCRAFT_PART_INSTALL
+      cp -av run-lighthttpd $SNAPCRAFT_PART_INSTALL
+      cp -av config.sh $SNAPCRAFT_PART_INSTALL
+      cp -av default.yaml $SNAPCRAFT_PART_INSTALL
     stage-packages:
         - gawk
-        - libavformat-ffmpeg56
+        - libavformat57
         - libc-bin
         - libexif12
         - libflac8
