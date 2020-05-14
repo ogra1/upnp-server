@@ -1,5 +1,5 @@
 name: upnp-server
-version: 0.1.1
+version: 0.2.0
 summary: upload files with WebDAV and serve them via DLNA/UPnP
 description: |
     A very minimal UPnP/DLNA server that allows uploads via WebDAV
@@ -26,23 +26,94 @@ parts:
     source: ./minidlna
     plugin: make
     build-packages:
-        - autoconf
-        - automake
-        - autopoint
-        - autotools-dev
-        - gcc
-        - gettext
-        - git
-        - libavcodec-dev
-        - libavformat-dev
-        - libavutil-dev
-        - libexif-dev
-        - libflac-dev
-        - libid3tag0-dev
-        - libjpeg-dev
-        - libogg-dev
-        - libsqlite3-dev
-        - libvorbis-dev
+      - autoconf
+      - automake
+      - autopoint
+      - autotools-dev
+      - gcc
+      - gettext
+      - git
+      - libavcodec-dev
+      - libavformat-dev
+      - libavutil-dev
+      - libexif-dev
+      - libflac-dev
+      - libid3tag0-dev
+      - libjpeg-dev
+      - libogg-dev
+      - libsqlite3-dev
+      - libvorbis-dev
+    stage-packages:
+      - libavcodec57
+      - libavformat57
+      - libavutil55
+      - libbluray2
+      - libcairo2
+      - libchromaprint1
+      - libcroco3
+      - libcrystalhd3
+      - libdatrie1
+      - libdrm2
+      - libexif12
+      - libflac8
+      - libfontconfig1
+      - libfreetype6
+      - libgdk-pixbuf2.0-0
+      - libgme0
+      - libgomp1
+      - libgraphite2-3
+      - libgsm1
+      - libharfbuzz0b
+      - libicu60
+      - libid3tag0
+      - libjpeg-turbo8
+      - libmp3lame0
+      - libmpg123-0
+      - libnuma1
+      - libogg0
+      - libopenjp2-7
+      - libopenmpt0
+      - libopus0
+      - libpango-1.0-0
+      - libpangocairo-1.0-0
+      - libpangoft2-1.0-0
+      - libpixman-1-0
+      - libpng16-16
+      - librsvg2-2
+      - libshine3
+      - libsnappy1v5
+      - libsoxr0
+      - libspeex1
+      - libssh-gcrypt-4
+      - libswresample2
+      - libthai0
+      - libtheora0
+      - libtwolame0
+      - libva-drm2
+      - libva-x11-2
+      - libva2
+      - libvdpau1
+      - libvorbis0a
+      - libvorbisenc2
+      - libvorbisfile3
+      - libvpx5
+      - libwavpack1
+      - libwebp6
+      - libwebpmux3
+      - libx11-6
+      - libx264-152
+      - libx265-146
+      - libxau6
+      - libxcb-render0
+      - libxcb-shm0
+      - libxcb1
+      - libxdmcp6
+      - libxext6
+      - libxfixes3
+      - libxml2
+      - libxrender1
+      - libxvidcore4
+      - libzvbi0
   copy:
     plugin: nil
     source: .
@@ -52,25 +123,25 @@ parts:
       cp -av config.sh $SNAPCRAFT_PART_INSTALL
       cp -av default.yaml $SNAPCRAFT_PART_INSTALL
     stage-packages:
-        - gawk
-        - libavformat57
-        - libc-bin
-        - libexif12
-        - libflac8
-        - libid3tag0
-        - libjpeg8
-        - libstdc++6
-        - libuuid1
-        - libvorbisfile3
-        - lighttpd-mod-webdav
-        - locales
+      - gawk
+      - libavformat57
+      - libc-bin
+      - libexif12
+      - libflac8
+      - libid3tag0
+      - libjpeg8
+      - libstdc++6
+      - libuuid1
+      - libvorbisfile3
+      - lighttpd-mod-webdav
+      - locales
     after: [minidlna]
     stage: [-usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6]
   sqlite:
     source: ./sqlite
     plugin: make
     build-packages:
-        - gzip
-        - tar
-        - wget
+      - gzip
+      - tar
+      - wget
     after: [copy]
